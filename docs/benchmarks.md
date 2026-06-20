@@ -57,6 +57,9 @@ planning, not replacement measurements for your own corpus.
 | `colqwen2` | Visual late interaction | OCR-free page retrieval | GPU/model weight requirements |
 | `pixelrag` | Visual embedding/VLM research | Screenshot-first retrieval | Research maturity |
 | `dse` | Document Screenshot Embedding | OCR-free screenshots | Implementation variance |
+| `lightrag` | Graph/hybrid RAG framework | Knowledge-graph enriched retrieval | Storage/provider setup |
+| `rag-anything` | Multimodal document RAG framework | Text, image, table, equation workflows | Heavy model/parser stack |
+| `agentic-file-search` | Tool-using file-search agent | Cross-reference following and citations | SaaS/model dependency |
 | `llamaindex` | Framework adapter | Reuse existing retrievers | Framework-specific result shapes |
 | `haystack` | Framework adapter | Reuse production pipelines | Framework-specific result shapes |
 | `txtai` | Framework adapter | Lightweight app integration | Framework-specific result shapes |
@@ -69,6 +72,9 @@ planning, not replacement measurements for your own corpus.
 | Local dense | yes | medium/high | optional | only for downloads |
 | SaaS dense/rerank | yes | low | no | yes |
 | Visual late-interaction | yes | high | recommended/required | only for downloads |
+| LightRAG/RAG-Anything | yes | medium/high | optional/recommended | provider-dependent |
+| Agentic file search | yes | low/medium | no | yes |
+| Adaptive chunking/headroom/cocoindex | yes | varies | optional | no by default |
 | Vector services | yes | service-dependent | no | maybe |
 
 ## Cost per 1K Queries
@@ -85,6 +91,9 @@ with chunk size, query length, rerank depth, region, and committed-use discounts
 | Cohere Rerank | can dominate at high candidate counts | searches/chunks ranked |
 | Voyage embeddings | often cents for small corpora | input tokens |
 | Visual local models | infra cost only | GPU time, page images, storage |
+| LightRAG/RAG-Anything | infra plus provider cost | embeddings, LLM calls, storage |
+| Agentic file search | provider cost | agent tool loop and document parsing |
+| Headroom compression | local or model-dependent | compression method |
 | Vector stores | $0 local to managed-service fees | storage, QPS, replicas |
 
 ## Slow Tests

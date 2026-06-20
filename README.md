@@ -33,6 +33,9 @@ ragfold compare examples/corpus.json examples/queries.json --engines text-rag,bm
 | `colqwen2` | gated | visual | yes | local VLM | code/model-dependent | late-interaction | no | slow | free infra cost |
 | `pixelrag` | gated | visual | yes | local/VLM | research/model-dependent | visual embedding | no | slow | free infra cost |
 | `dse` | gated | visual | yes | local | research/model-dependent | screenshot embedding | no | medium | free infra cost |
+| `lightrag` | gated | text | yes | local/framework | MIT | graph-hybrid RAG | framework-dependent | medium | infra/provider-dependent |
+| `rag-anything` | gated | multimodal | no | local/VLM framework | MIT | multimodal document RAG | framework-dependent | slow | infra/provider-dependent |
+| `agentic-file-search` | gated | text/documents | no | SaaS/agentic | project-dependent | agentic file search | no | slow | paid tokens |
 | `llamaindex` | gated | text | yes | framework | framework-dependent | framework retriever | framework-dependent | varies | varies |
 | `haystack` | gated | text | yes | framework | framework-dependent | framework retriever | framework-dependent | varies | varies |
 | `txtai` | gated | text | yes | framework | framework-dependent | framework retriever | framework-dependent | varies | varies |
@@ -52,6 +55,11 @@ credentials, and runtime are configured.
 | Need reranking after first-stage retrieval | Cross-encoder or Cohere Rerank adapters |
 | PDFs where layout matters and OCR should be avoided | `colpali` or `colqwen2` |
 | Screenshot/page-image retrieval experiments | `pixelrag` or `dse` |
+| Graph/hybrid RAG experiment from the LightRAG family | `lightrag` |
+| Multimodal document RAG over text, images, tables, equations | `rag-anything` |
+| Dynamic file exploration with citations instead of pre-built vectors | `agentic-file-search` |
+| Better chunks before retrieval | `RecursiveChunker` or `AdaptiveChunker` |
+| Compress retrieved passages before sending to an LLM | `NoopCompressor` or `HeadroomCompressor` |
 | Already invested in a RAG framework | `llamaindex`, `haystack`, or `txtai` |
 | Need persistent vector search | FAISS, Qdrant, Chroma, or pgvector vector-store extras |
 
@@ -76,6 +84,13 @@ credentials, and runtime are configured.
 | `cohere` | Cohere SDK | You have `COHERE_API_KEY` for Embed/Rerank |
 | `voyage` | Voyage AI SDK | You have `VOYAGE_API_KEY` |
 | `colpali`, `colqwen2` | ColPali engine stack | You can run visual document retrievers |
+| `lightrag` | LightRAG package | You want HKUDS LightRAG as a gated framework retriever |
+| `rag-anything` | RAG-Anything package | You want multimodal document RAG experiments |
+| `agentic-file-search` | source-installed agentic search package | You want tool-using document search |
+| `adaptive-chunking` | adaptive chunking source/package | You want per-document chunking strategy selection |
+| `headroom` | Headroom compression package | You want context compression after retrieval |
+| `cocoindex` | CocoIndex package | You want incremental indexing/corpus preparation |
+| `promptfoo` | Promptfoo package | You want benchmark export for LLM/RAG eval workflows |
 | `faiss`, `qdrant`, `chroma`, `pgvector` | vector-store clients | You need persistent or accelerated vector search |
 | `llamaindex`, `haystack`, `txtai` | framework clients | You want thin wrappers over existing retrievers |
 | `dev` | pytest, ruff, mypy | Local development and CI |
@@ -86,6 +101,7 @@ Examples:
 pip install ragfold
 pip install "ragfold[bm25,sentence-transformers,faiss]"
 pip install "ragfold[openai,cohere,voyage]"
+pip install "ragfold[lightrag,rag-anything,adaptive-chunking,headroom]"
 ```
 
 ## Python API
@@ -160,8 +176,10 @@ EngineRouter  -- optional reranker --> RetrievalResult / RagAnswer
       +-- lexical: text-rag, bm25
       +-- dense: sentence-transformers, OpenAI, Cohere, Voyage
       +-- visual: ColPali, ColQwen2, PixelRAG, DSE
+      +-- github RAG forks: LightRAG, RAG-Anything, agentic-file-search
       +-- framework: LlamaIndex, Haystack, txtai
       +-- vector stores: in-memory, FAISS, Qdrant, Chroma, pgvector
+      +-- stages: chunkers, indexers, context compressors, eval exporters
 ```
 
 ## Development

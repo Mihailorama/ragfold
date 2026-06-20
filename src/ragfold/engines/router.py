@@ -192,6 +192,11 @@ def default_engine_factories() -> dict[str, type[RagEngine]]:
         VoyageEmbedEngine,
     )
     from ragfold.engines.frameworks import HaystackEngine, LlamaIndexEngine, TxtAIEngine
+    from ragfold.engines.github_rag import (
+        AgenticFileSearchEngine,
+        LightRAGEngine,
+        RAGAnythingEngine,
+    )
     from ragfold.engines.text_rag import TextRagEngine
     from ragfold.engines.visual import ColPaliEngine, ColQwen2Engine, DSEEngine, PixelRAGEngine
 
@@ -206,6 +211,9 @@ def default_engine_factories() -> dict[str, type[RagEngine]]:
         "colqwen2": ColQwen2Engine,
         "pixelrag": PixelRAGEngine,
         "dse": DSEEngine,
+        "lightrag": LightRAGEngine,
+        "rag-anything": RAGAnythingEngine,
+        "agentic-file-search": AgenticFileSearchEngine,
         "llamaindex": LlamaIndexEngine,
         "haystack": HaystackEngine,
         "txtai": TxtAIEngine,

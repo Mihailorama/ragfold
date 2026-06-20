@@ -83,6 +83,27 @@ haystack = [
 txtai = [
     "txtai>=7.0",
 ]
+lightrag = [
+    "lightrag-hku>=1.0",
+]
+rag-anything = [
+    "raganything>=1.0",
+]
+adaptive-chunking = [
+    # Install from the upstream package or source checkout when available.
+]
+headroom = [
+    "headroom-ai>=0.1",
+]
+cocoindex = [
+    "cocoindex>=0.1",
+]
+agentic-file-search = [
+    # The upstream project is currently expected as a source install.
+]
+promptfoo = [
+    "promptfoo>=0.1",
+]
 rerank-cross-encoder = [
     "sentence-transformers>=3.0",
 ]
@@ -100,7 +121,7 @@ dev = [
     "ragfold[test]",
 ]
 all = [
-    "ragfold[bm25,sentence-transformers,openai,cohere,voyage,colpali,colqwen2,faiss,qdrant,chroma,pgvector,llamaindex,haystack,txtai,rerank-cross-encoder,rerank-cohere,evaluation]",
+    "ragfold[bm25,sentence-transformers,openai,cohere,voyage,colpali,colqwen2,faiss,qdrant,chroma,pgvector,llamaindex,haystack,txtai,lightrag,rag-anything,adaptive-chunking,headroom,cocoindex,agentic-file-search,promptfoo,rerank-cross-encoder,rerank-cohere,evaluation]",
 ]
 
 [project.urls]

@@ -18,6 +18,7 @@ from ragfold.engines.dense import (
     VoyageEmbedEngine,
 )
 from ragfold.engines.frameworks import HaystackEngine, LlamaIndexEngine, TxtAIEngine
+from ragfold.engines.github_rag import AgenticFileSearchEngine, LightRAGEngine, RAGAnythingEngine
 from ragfold.engines.router import EngineRouter, default_engine_factories
 from ragfold.engines.text_rag import TextRagEngine
 from ragfold.engines.visual import ColPaliEngine, ColQwen2Engine, DSEEngine, PixelRAGEngine
@@ -39,10 +40,13 @@ __all__ = [
     "DocumentChunk",
     "EngineCapabilities",
     "EngineRouter",
+    "AgenticFileSearchEngine",
     "HaystackEngine",
+    "LightRAGEngine",
     "LlamaIndexEngine",
     "OpenAIEmbedEngine",
     "PixelRAGEngine",
+    "RAGAnythingEngine",
     "RagAnswer",
     "RagEngine",
     "RetrievedPassage",
