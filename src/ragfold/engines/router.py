@@ -8,7 +8,9 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from ragfold.engines.base import CorpusInput, RagEngine, RetrievalResult
+from ragfold.compression import ContextCompressor
+from ragfold.engines.base import CorpusInput, RagEngine, RetrievalResult, normalize_corpus
+from ragfold.preprocessing import Chunker
 from ragfold.rerankers import BaseReranker
 
 QueryInput = str | Mapping[str, Any]
@@ -35,9 +37,13 @@ class EngineRouter:
         self,
         engines: Sequence[RagEngine] | None = None,
         reranker: BaseReranker | None = None,
+        chunker: Chunker | None = None,
+        compressor: ContextCompressor | None = None,
     ) -> None:
         self._engines: dict[str, RagEngine] = {}
         self.reranker = reranker
+        self.chunker = chunker
+        self.compressor = compressor
         for engine in engines or []:
             self.register(engine)
 
@@ -85,11 +91,47 @@ class EngineRouter:
         **kwargs: Any,
     ) -> RetrievalResult:
         engine = self.select(engine_hint=engine_hint)
-        result = await engine.retrieve(corpus, query, top_k=top_k, **kwargs)
+        return await self._retrieve_with_engine(engine, corpus, query, top_k=top_k, **kwargs)
+
+    async def _retrieve_with_engine(
+        self,
+        engine: RagEngine,
+        corpus: CorpusInput,
+        query: str,
+        top_k: int = 5,
+        **kwargs: Any,
+    ) -> RetrievalResult:
+        prepared_corpus, metadata = self._prepare_corpus(corpus)
+        result = await engine.retrieve(prepared_corpus, query, top_k=top_k, **kwargs)
+        result.metadata.update(metadata)
         if self.reranker and self.reranker.is_available() and result.passages:
             result.passages = self.reranker.rerank(query, result.passages)
             result.metadata["reranker"] = self.reranker.__class__.__name__
+        if self.compressor and self.compressor.is_available() and result.passages:
+            result.passages = self.compressor.compress(result.passages, query=query)
+            result.metadata["compressor"] = self.compressor.__class__.__name__
         return result
+
+    def _prepare_corpus(self, corpus: CorpusInput) -> tuple[CorpusInput, dict[str, Any]]:
+        if not self.chunker or not self.chunker.is_available():
+            return corpus, {}
+
+        chunked: list[dict[str, Any]] = []
+        for document in normalize_corpus(corpus):
+            for chunk in self.chunker.chunk(document.text, document_id=document.id):
+                chunked.append(
+                    {
+                        "id": f"{document.id}#chunk-{chunk.index}",
+                        "text": chunk.text,
+                        "metadata": {
+                            **document.metadata,
+                            **chunk.metadata,
+                            "source_document_id": document.id,
+                            "chunk_index": chunk.index,
+                        },
+                    }
+                )
+        return chunked, {"chunker": self.chunker.__class__.__name__}
 
     async def compare(
         self,
@@ -108,7 +150,13 @@ class EngineRouter:
             for query in queries:
                 try:
                     engine_results.append(
-                        await engine.retrieve(corpus, _query_text(query), top_k=top_k, **kwargs)
+                        await self._retrieve_with_engine(
+                            engine,
+                            corpus,
+                            _query_text(query),
+                            top_k=top_k,
+                            **kwargs,
+                        )
                     )
                 except NotImplementedError:
                     engine_results = []

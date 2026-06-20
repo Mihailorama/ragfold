@@ -6,6 +6,7 @@ from ragfold.engines.base import RetrievalResult
 from ragfold.engines.bm25 import BM25Engine
 from ragfold.engines.router import EngineRouter
 from ragfold.engines.text_rag import TextRagEngine
+from ragfold.preprocessing import RecursiveChunker
 from ragfold.rerankers import BaseReranker
 
 CORPUS = [
@@ -87,3 +88,75 @@ async def test_router_applies_available_reranker():
 
     assert [passage.rank for passage in result.passages] == [1, 2]
     assert result.metadata["reranker"] == "ReverseReranker"
+
+
+class RecordingEngine(TextRagEngine):
+    @property
+    def name(self):
+        return "recording"
+
+    async def retrieve(self, corpus, query, top_k=5, **kwargs):
+        self.last_corpus = corpus
+        return await super().retrieve(corpus, query, top_k=top_k, **kwargs)
+
+
+@pytest.mark.asyncio
+async def test_router_applies_chunker_before_retrieval():
+    engine = RecordingEngine()
+    router = EngineRouter(
+        [engine],
+        chunker=RecursiveChunker(chunk_size=2, chunk_overlap=0),
+    )
+
+    result = await router.retrieve(
+        [{"id": "doc", "text": "alpha beta gamma", "metadata": {"source": "fixture"}}],
+        "gamma",
+        top_k=3,
+        engine_hint="recording",
+    )
+
+    assert [item["id"] for item in engine.last_corpus] == ["doc#chunk-0", "doc#chunk-1"]
+    assert engine.last_corpus[0]["metadata"]["source_document_id"] == "doc"
+    assert engine.last_corpus[0]["metadata"]["source"] == "fixture"
+    assert result.metadata["chunker"] == "RecursiveChunker"
+
+
+class SuffixCompressor:
+    def is_available(self):
+        return True
+
+    def compress(self, passages, query, **kwargs):
+        for passage in passages:
+            passage.text = f"{passage.text} [compressed for {query}]"
+        return passages
+
+
+@pytest.mark.asyncio
+async def test_router_applies_compressor_after_retrieval():
+    router = EngineRouter([TextRagEngine()], compressor=SuffixCompressor())
+
+    result = await router.retrieve(CORPUS, "invoice", top_k=1, engine_hint="text-rag")
+
+    assert result.passages[0].text.endswith("[compressed for invoice]")
+    assert result.metadata["compressor"] == "SuffixCompressor"
+
+
+@pytest.mark.asyncio
+async def test_compare_uses_router_pipeline_stages():
+    router = EngineRouter(
+        [TextRagEngine()],
+        chunker=RecursiveChunker(chunk_size=2, chunk_overlap=0),
+        compressor=SuffixCompressor(),
+    )
+
+    results = await router.compare(
+        [{"id": "doc", "text": "alpha beta gamma"}],
+        [{"id": "q1", "query": "gamma", "relevant_ids": ["doc#chunk-1"]}],
+        engines=["text-rag"],
+        top_k=1,
+    )
+
+    result = results["text-rag"][0]
+    assert result.metadata["chunker"] == "RecursiveChunker"
+    assert result.metadata["compressor"] == "SuffixCompressor"
+    assert result.passages[0].text.endswith("[compressed for gamma]")

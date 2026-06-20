@@ -165,6 +165,27 @@ docfold: predicted value first, reference value second, and higher is better.
 Reference-free faithfulness is intentionally a gated `slow` hook because it
 requires an LLM judge.
 
+## Pipeline Stages
+
+`EngineRouter` can apply optional lifecycle stages consistently across
+`retrieve()`, `compare()`, and `process_batch()`:
+
+```python
+from ragfold import EngineRouter
+from ragfold.compression import NoopCompressor
+from ragfold.engines.text_rag import TextRagEngine
+from ragfold.preprocessing import RecursiveChunker
+
+router = EngineRouter(
+    [TextRagEngine()],
+    chunker=RecursiveChunker(chunk_size=300, chunk_overlap=50),
+    compressor=NoopCompressor(),
+)
+```
+
+Heavy integrations such as `AdaptiveChunker` and `HeadroomCompressor` stay gated
+behind optional extras and injected runtime objects.
+
 ## Architecture
 
 ```
