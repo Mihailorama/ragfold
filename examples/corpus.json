@@ -1,0 +1,14 @@
+[
+  {
+    "id": "ragfold",
+    "text": "Ragfold compares retrieval and extraction engines over document corpora."
+  },
+  {
+    "id": "docfold",
+    "text": "Docfold compares document parsing and OCR engines behind one interface."
+  },
+  {
+    "id": "paris",
+    "text": "Paris is the capital of France and a common retrieval benchmark example."
+  }
+]

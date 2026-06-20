@@ -1,0 +1,139 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ragfold"
+version = "0.1.0"
+description = "Unified interface for RAG and information-extraction engines with built-in benchmarks."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "Mihailorama", email = "mihailorama@gmail.com" },
+]
+keywords = [
+    "rag",
+    "retrieval-augmented-generation",
+    "information-extraction",
+    "vector-search",
+    "document-ai",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Indexing",
+]
+dependencies = []
+
+[project.optional-dependencies]
+bm25 = [
+    "rank-bm25>=0.2.2",
+]
+sentence-transformers = [
+    "sentence-transformers>=3.0",
+]
+openai = [
+    "openai>=1.0",
+]
+cohere = [
+    "cohere>=5.0",
+]
+voyage = [
+    "voyageai>=0.2",
+]
+colpali = [
+    "colpali-engine>=0.3",
+]
+colqwen2 = [
+    "colpali-engine>=0.3",
+]
+pixelrag = [
+    # Model weights and runtime are intentionally not installed by default.
+]
+dse = [
+    # Document Screenshot Embedding implementations vary by research release.
+]
+faiss = [
+    "faiss-cpu>=1.8",
+]
+qdrant = [
+    "qdrant-client>=1.9",
+]
+chroma = [
+    "chromadb>=0.5",
+]
+pgvector = [
+    "psycopg[binary]>=3.1",
+    "pgvector>=0.2",
+]
+llamaindex = [
+    "llama-index-core>=0.10",
+]
+haystack = [
+    "haystack-ai>=2.0",
+]
+txtai = [
+    "txtai>=7.0",
+]
+rerank-cross-encoder = [
+    "sentence-transformers>=3.0",
+]
+rerank-cohere = [
+    "cohere>=5.0",
+]
+evaluation = []
+test = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "ruff>=0.4",
+    "mypy>=1.8",
+]
+dev = [
+    "ragfold[test]",
+]
+all = [
+    "ragfold[bm25,sentence-transformers,openai,cohere,voyage,colpali,colqwen2,faiss,qdrant,chroma,pgvector,llamaindex,haystack,txtai,rerank-cross-encoder,rerank-cohere,evaluation]",
+]
+
+[project.urls]
+Homepage = "https://github.com/mihailorama/ragfold"
+Documentation = "https://github.com/mihailorama/ragfold/tree/main/docs"
+Repository = "https://github.com/mihailorama/ragfold"
+Issues = "https://github.com/mihailorama/ragfold/issues"
+Changelog = "https://github.com/mihailorama/ragfold/blob/main/CHANGELOG.md"
+
+[project.scripts]
+ragfold = "ragfold.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ragfold"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+markers = [
+    "slow: marks tests that require network, model downloads, SaaS APIs, GPU, or external services",
+    "integration: marks tests that require optional engine dependencies",
+    "gpu: marks tests that require GPU",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+warn_unused_configs = true

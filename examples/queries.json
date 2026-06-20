@@ -1,0 +1,14 @@
+[
+  {
+    "id": "q1",
+    "query": "retrieval extraction engines",
+    "relevant_ids": ["ragfold"],
+    "answers": ["ragfold"]
+  },
+  {
+    "id": "q2",
+    "query": "capital of France",
+    "relevant_ids": ["paris"],
+    "answers": ["Paris"]
+  }
+]
