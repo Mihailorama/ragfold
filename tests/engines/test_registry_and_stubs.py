@@ -34,7 +34,10 @@ async def test_unavailable_stub_engines_are_skipped_in_compare_sweeps(monkeypatc
 
 class ToyVisualEmbedder:
     def encode(self, texts):
-        return [[float("diagram" in text.lower()), float("table" in text.lower())] for text in texts]
+        return [
+            [float("diagram" in text.lower()), float("table" in text.lower())]
+            for text in texts
+        ]
 
 
 @pytest.mark.asyncio

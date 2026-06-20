@@ -2,12 +2,11 @@ import asyncio
 
 import pytest
 
-from ragfold.engines.base import RagEngine, RetrievalResult
+from ragfold.engines.base import RetrievalResult
 from ragfold.engines.bm25 import BM25Engine
 from ragfold.engines.router import EngineRouter
 from ragfold.engines.text_rag import TextRagEngine
 from ragfold.rerankers import BaseReranker
-
 
 CORPUS = [
     {"id": "a", "text": "Alpha invoice payment"},

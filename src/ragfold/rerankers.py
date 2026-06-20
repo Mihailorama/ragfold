@@ -24,7 +24,10 @@ class CrossEncoderReranker(BaseReranker):
         self.model = model
 
     def is_available(self) -> bool:
-        return self.model is not None or importlib.util.find_spec("sentence_transformers") is not None
+        return (
+            self.model is not None
+            or importlib.util.find_spec("sentence_transformers") is not None
+        )
 
     def rerank(self, query: str, passages: list[RetrievedPassage]) -> list[RetrievedPassage]:
         if self.model is None:

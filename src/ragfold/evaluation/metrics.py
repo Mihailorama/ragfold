@@ -51,7 +51,11 @@ def ndcg_at_k(predicted: Sequence[str], reference: Sequence[str], k: int) -> flo
     return dcg / ideal if ideal else 0.0
 
 
-def average_precision(predicted: Sequence[str], reference: Sequence[str], k: int | None = None) -> float:
+def average_precision(
+    predicted: Sequence[str],
+    reference: Sequence[str],
+    k: int | None = None,
+) -> float:
     ref = set(reference)
     if not ref:
         return 1.0

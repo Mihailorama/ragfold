@@ -7,7 +7,14 @@ import os
 import time
 from typing import Any, Protocol
 
-from ragfold.engines.base import CorpusInput, EngineCapabilities, RagEngine, RetrievedPassage, RetrievalResult, normalize_corpus
+from ragfold.engines.base import (
+    CorpusInput,
+    EngineCapabilities,
+    RagEngine,
+    RetrievalResult,
+    RetrievedPassage,
+    normalize_corpus,
+)
 from ragfold.vectorstores import InMemoryVectorStore, VectorRecord, VectorStore
 
 
@@ -150,7 +157,8 @@ class _SaaSDenseEngine(_DenseVectorEngine):
             return self.model
         self.ensure_available()
         raise NotImplementedError(
-            f"Engine '{self.name}' is gated for real SaaS inference; inject a model/client in tests."
+            f"Engine '{self.name}' is gated for real SaaS inference; "
+            "inject a model/client in tests."
         )
 
 

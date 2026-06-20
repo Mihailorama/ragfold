@@ -15,7 +15,11 @@ def tokenize(text: str) -> list[str]:
     return [match.group(0).lower() for match in _TOKEN_RE.finditer(text)]
 
 
-def rank_passages(chunks: list[DocumentChunk], scores: list[float], top_k: int) -> list[RetrievedPassage]:
+def rank_passages(
+    chunks: list[DocumentChunk],
+    scores: list[float],
+    top_k: int,
+) -> list[RetrievedPassage]:
     ranked = sorted(zip(chunks, scores, strict=True), key=lambda item: item[1], reverse=True)
     passages: list[RetrievedPassage] = []
     for rank, (chunk, score) in enumerate(ranked[: max(top_k, 0)], start=1):

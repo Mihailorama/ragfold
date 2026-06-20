@@ -2,8 +2,8 @@ from ragfold.engines.base import (
     DocumentChunk,
     EngineCapabilities,
     RagAnswer,
-    RetrievedPassage,
     RetrievalResult,
+    RetrievedPassage,
     normalize_corpus,
 )
 

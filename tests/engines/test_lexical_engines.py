@@ -3,7 +3,6 @@ import pytest
 from ragfold.engines.bm25 import BM25Engine
 from ragfold.engines.text_rag import TextRagEngine
 
-
 CORPUS = [
     {"id": "paris", "text": "Paris is the capital of France and has the Louvre."},
     {"id": "berlin", "text": "Berlin is the capital of Germany."},

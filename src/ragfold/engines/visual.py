@@ -6,7 +6,14 @@ import importlib.util
 import time
 from typing import Any, Protocol
 
-from ragfold.engines.base import CorpusInput, EngineCapabilities, RagEngine, RetrievedPassage, RetrievalResult, normalize_corpus
+from ragfold.engines.base import (
+    CorpusInput,
+    EngineCapabilities,
+    RagEngine,
+    RetrievalResult,
+    RetrievedPassage,
+    normalize_corpus,
+)
 from ragfold.vectorstores import InMemoryVectorStore, VectorRecord
 
 
@@ -49,7 +56,8 @@ class ColPaliEngine(RagEngine):
     ) -> RetrievalResult:
         if self.embedder is None:
             raise NotImplementedError(
-                "Engine 'colpali' unavailable: install ragfold[colpali] and inject a loaded embedder."
+                "Engine 'colpali' unavailable: install ragfold[colpali] "
+                "and inject a loaded embedder."
             )
 
         start = time.perf_counter()
@@ -59,7 +67,12 @@ class ColPaliEngine(RagEngine):
         store = InMemoryVectorStore()
         store.add(
             [
-                VectorRecord(id=chunk.id, vector=list(vector), text=chunk.text, metadata=chunk.metadata)
+                VectorRecord(
+                    id=chunk.id,
+                    vector=list(vector),
+                    text=chunk.text,
+                    metadata=chunk.metadata,
+                )
                 for chunk, vector in zip(chunks, doc_vectors, strict=True)
             ]
         )

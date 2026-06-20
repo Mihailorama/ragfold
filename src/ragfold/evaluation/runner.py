@@ -193,16 +193,17 @@ def _summarize(
         answer_f1_scores.append(max(answer_f1(predicted_answer, ref) for ref in refs))
 
     count = len(results)
+    paired = list(zip(predicted_ids, references, strict=True))
     return EvaluationRow(
         engine_name=engine_name,
         queries=count,
         k=top_k,
-        recall_at_k=sum(recall_at_k(pred, ref, top_k) for pred, ref in zip(predicted_ids, references, strict=True)) / count,
-        precision_at_k=sum(precision_at_k(pred, ref, top_k) for pred, ref in zip(predicted_ids, references, strict=True)) / count,
-        map=sum(average_precision(pred, ref, top_k) for pred, ref in zip(predicted_ids, references, strict=True)) / count,
-        hit_at_k=sum(hit_at_k(pred, ref, top_k) for pred, ref in zip(predicted_ids, references, strict=True)) / count,
-        mrr=sum(mean_reciprocal_rank(pred, ref) for pred, ref in zip(predicted_ids, references, strict=True)) / count,
-        ndcg_at_k=sum(ndcg_at_k(pred, ref, top_k) for pred, ref in zip(predicted_ids, references, strict=True)) / count,
+        recall_at_k=sum(recall_at_k(pred, ref, top_k) for pred, ref in paired) / count,
+        precision_at_k=sum(precision_at_k(pred, ref, top_k) for pred, ref in paired) / count,
+        map=sum(average_precision(pred, ref, top_k) for pred, ref in paired) / count,
+        hit_at_k=sum(hit_at_k(pred, ref, top_k) for pred, ref in paired) / count,
+        mrr=sum(mean_reciprocal_rank(pred, ref) for pred, ref in paired) / count,
+        ndcg_at_k=sum(ndcg_at_k(pred, ref, top_k) for pred, ref in paired) / count,
         answer_em=(sum(answer_em_scores) / len(answer_em_scores) if answer_em_scores else None),
         answer_f1=(sum(answer_f1_scores) / len(answer_f1_scores) if answer_f1_scores else None),
         latency_ms=sum(result.processing_time_ms for result in results) / count,

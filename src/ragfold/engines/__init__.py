@@ -7,8 +7,8 @@ from ragfold.engines.base import (
     EngineCapabilities,
     RagAnswer,
     RagEngine,
-    RetrievedPassage,
     RetrievalResult,
+    RetrievedPassage,
 )
 from ragfold.engines.bm25 import BM25Engine
 from ragfold.engines.dense import (

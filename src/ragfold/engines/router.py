@@ -11,7 +11,6 @@ from typing import Any
 from ragfold.engines.base import CorpusInput, RagEngine, RetrievalResult
 from ragfold.rerankers import BaseReranker
 
-
 QueryInput = str | Mapping[str, Any]
 
 
@@ -186,7 +185,12 @@ class EngineRouter:
 
 def default_engine_factories() -> dict[str, type[RagEngine]]:
     from ragfold.engines.bm25 import BM25Engine
-    from ragfold.engines.dense import CohereEmbedEngine, OpenAIEmbedEngine, SentenceTransformersEngine, VoyageEmbedEngine
+    from ragfold.engines.dense import (
+        CohereEmbedEngine,
+        OpenAIEmbedEngine,
+        SentenceTransformersEngine,
+        VoyageEmbedEngine,
+    )
     from ragfold.engines.frameworks import HaystackEngine, LlamaIndexEngine, TxtAIEngine
     from ragfold.engines.text_rag import TextRagEngine
     from ragfold.engines.visual import ColPaliEngine, ColQwen2Engine, DSEEngine, PixelRAGEngine

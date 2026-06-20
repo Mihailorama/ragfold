@@ -8,7 +8,11 @@ from pathlib import Path
 from ragfold.evaluation.runner import Dataset, QueryExample
 
 
-def load_json_dataset(corpus_path: str | Path, queries_path: str | Path, name: str = "json") -> Dataset:
+def load_json_dataset(
+    corpus_path: str | Path,
+    queries_path: str | Path,
+    name: str = "json",
+) -> Dataset:
     corpus_data = json.loads(Path(corpus_path).read_text(encoding="utf-8"))
     query_data = json.loads(Path(queries_path).read_text(encoding="utf-8"))
     queries = [QueryExample.from_mapping(item) for item in query_data]

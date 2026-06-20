@@ -9,7 +9,13 @@ from collections import Counter
 from typing import Any
 
 from ragfold.engines._text import rank_passages, tokenize
-from ragfold.engines.base import CorpusInput, EngineCapabilities, RagEngine, RetrievalResult, normalize_corpus
+from ragfold.engines.base import (
+    CorpusInput,
+    EngineCapabilities,
+    RagEngine,
+    RetrievalResult,
+    normalize_corpus,
+)
 
 
 class BM25Engine(RagEngine):
@@ -80,7 +86,11 @@ class BM25Engine(RagEngine):
 
         return self._python_scores(tokenized_docs, query_terms)
 
-    def _python_scores(self, tokenized_docs: list[list[str]], query_terms: list[str]) -> list[float]:
+    def _python_scores(
+        self,
+        tokenized_docs: list[list[str]],
+        query_terms: list[str],
+    ) -> list[float]:
         total_docs = len(tokenized_docs)
         avgdl = sum(len(doc) for doc in tokenized_docs) / total_docs if total_docs else 0.0
         doc_freq: Counter[str] = Counter()
@@ -97,7 +107,8 @@ class BM25Engine(RagEngine):
                     continue
                 idf = math.log(1 + (total_docs - doc_freq[term] + 0.5) / (doc_freq[term] + 0.5))
                 numerator = counts[term] * (self.k1 + 1)
-                denominator = counts[term] + self.k1 * (1 - self.b + self.b * doc_len / (avgdl or 1))
+                length_norm = 1 - self.b + self.b * doc_len / (avgdl or 1)
+                denominator = counts[term] + self.k1 * length_norm
                 score += idf * numerator / denominator
             scores.append(score)
         return scores

@@ -6,7 +6,13 @@ import time
 from typing import Any
 
 from ragfold.engines._text import rank_passages, tfidf_scores
-from ragfold.engines.base import CorpusInput, EngineCapabilities, RagEngine, RetrievalResult, normalize_corpus
+from ragfold.engines.base import (
+    CorpusInput,
+    EngineCapabilities,
+    RagEngine,
+    RetrievalResult,
+    normalize_corpus,
+)
 
 
 class TextRagEngine(RagEngine):

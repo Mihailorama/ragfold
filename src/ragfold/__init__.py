@@ -7,8 +7,8 @@ from ragfold.engines.base import (
     EngineCapabilities,
     RagAnswer,
     RagEngine,
-    RetrievedPassage,
     RetrievalResult,
+    RetrievedPassage,
 )
 from ragfold.engines.router import EngineRouter
 

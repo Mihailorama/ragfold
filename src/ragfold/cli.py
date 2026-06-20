@@ -29,7 +29,10 @@ def main(argv: list[str] | None = None) -> None:
     compare_p.add_argument("--top-k", type=int, default=5)
 
     bench_p = sub.add_parser("bench", help="Run a named or path-based benchmark")
-    bench_p.add_argument("dataset", help="'examples' or a directory containing corpus.json/queries.json")
+    bench_p.add_argument(
+        "dataset",
+        help="'examples' or a directory containing corpus.json/queries.json",
+    )
     bench_p.add_argument("--engines", help="Comma-separated engine names")
     bench_p.add_argument("--top-k", type=int, default=5)
 
