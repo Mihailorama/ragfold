@@ -17,6 +17,7 @@ and this project follows semantic versioning once published.
 - Optional reranker interfaces for cross-encoder and Cohere Rerank.
 - Framework stubs for LlamaIndex, Haystack, and txtai.
 - Gated GitHub RAG fork adapters for LightRAG, RAG-Anything, and agentic-file-search.
+- Optional LightRAG runtime path for configured `lightrag-hku` clients.
 - Lifecycle stages for chunking, context compression, indexing, and promptfoo export.
 - Engine router with auto-select, compare, and bounded batch processing.
 - Evaluation metrics, dataset adapters, report generation, examples, and CLI.

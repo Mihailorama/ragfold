@@ -135,6 +135,22 @@ async def main():
 asyncio.run(main())
 ```
 
+Optional LightRAG runtime, with provider/model functions configured by the
+caller:
+
+```python
+from lightrag.llm.openai import gpt_4o_mini_complete, openai_embed
+
+from ragfold.engines.github_rag import LightRAGEngine
+
+
+engine = LightRAGEngine(
+    working_dir="./rag_storage",
+    llm_model_func=gpt_4o_mini_complete,
+    embedding_func=openai_embed,
+)
+```
+
 ## CLI
 
 ```bash

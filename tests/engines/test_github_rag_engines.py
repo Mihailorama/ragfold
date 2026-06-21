@@ -71,6 +71,108 @@ async def test_lightrag_injected_async_client_dict_normalizes_to_retrieval_resul
     assert client.calls[0]["kwargs"]["mode"] == "hybrid"
 
 
+class FakeQueryParam:
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
+class FakeLightRAGRuntime:
+    instances = []
+
+    def __init__(self, **kwargs):
+        self.constructor_kwargs = kwargs
+        self.initialized = False
+        self.inserted = []
+        self.queries = []
+        FakeLightRAGRuntime.instances.append(self)
+
+    async def initialize_storages(self):
+        self.initialized = True
+
+    async def ainsert(self, docs, ids=None, file_paths=None):
+        self.inserted.append({"docs": docs, "ids": ids, "file_paths": file_paths})
+
+    async def aquery(self, query, param=None):
+        self.queries.append({"query": query, "param": param})
+        if getattr(param, "only_need_context", False):
+            return "LightRAG context: graph context from doc-1"
+        return "LightRAG generated answer"
+
+
+@pytest.mark.asyncio
+async def test_lightrag_runtime_adapter_indexes_corpus_and_queries_context(tmp_path):
+    FakeLightRAGRuntime.instances.clear()
+    engine = LightRAGEngine(
+        working_dir=str(tmp_path / "lightrag"),
+        llm_model_func=lambda *_args, **_kwargs: "llm",
+        embedding_func=lambda texts: [[1.0] for _ in texts],
+        lightrag_cls=FakeLightRAGRuntime,
+        query_param_cls=FakeQueryParam,
+    )
+
+    result = await engine.retrieve(
+        [{"id": "doc-1", "text": "Ragfold integrates LightRAG.", "metadata": {"path": "a.md"}}],
+        "What does ragfold integrate?",
+        top_k=3,
+        mode="hybrid",
+    )
+
+    runtime = FakeLightRAGRuntime.instances[0]
+    query_param = runtime.queries[0]["param"]
+    assert engine.is_available() is True
+    assert runtime.initialized is True
+    assert runtime.inserted[0]["docs"] == ["Ragfold integrates LightRAG."]
+    assert runtime.inserted[0]["ids"] == ["doc-1"]
+    assert result.engine_name == "lightrag"
+    assert result.passages[0].document_id == "lightrag-context"
+    assert result.passages[0].text == "LightRAG context: graph context from doc-1"
+    assert result.passages[0].metadata["mode"] == "hybrid"
+    assert query_param.mode == "hybrid"
+    assert query_param.top_k == 3
+    assert query_param.chunk_top_k == 3
+    assert query_param.only_need_context is True
+
+
+@pytest.mark.asyncio
+async def test_lightrag_runtime_adapter_can_attach_generated_answer(tmp_path):
+    FakeLightRAGRuntime.instances.clear()
+    engine = LightRAGEngine(
+        working_dir=str(tmp_path / "lightrag"),
+        llm_model_func=lambda *_args, **_kwargs: "llm",
+        embedding_func=lambda texts: [[1.0] for _ in texts],
+        lightrag_cls=FakeLightRAGRuntime,
+        query_param_cls=FakeQueryParam,
+    )
+
+    result = await engine.retrieve(
+        [{"id": "doc-1", "text": "Ragfold integrates LightRAG."}],
+        "What does ragfold integrate?",
+        top_k=1,
+        generate_answer=True,
+    )
+
+    runtime = FakeLightRAGRuntime.instances[0]
+    assert result.answer.answer == "LightRAG generated answer"
+    assert len(runtime.queries) == 2
+    assert runtime.queries[0]["param"].only_need_context is True
+    assert runtime.queries[1]["param"].only_need_context is False
+
+
+@pytest.mark.asyncio
+async def test_lightrag_runtime_adapter_requires_model_functions(tmp_path):
+    engine = LightRAGEngine(
+        working_dir=str(tmp_path / "lightrag"),
+        lightrag_cls=FakeLightRAGRuntime,
+        query_param_cls=FakeQueryParam,
+    )
+
+    assert engine.is_available() is False
+    with pytest.raises(NotImplementedError, match="llm_model_func.*embedding_func"):
+        await engine.retrieve([{"id": "doc-1", "text": "text"}], "question")
+
+
 class SyncListClient:
     def search(self, *, corpus, query, top_k, **kwargs):
         return [
