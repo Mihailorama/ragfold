@@ -23,6 +23,7 @@ and this project follows semantic versioning once published.
 - Evaluation metrics, dataset adapters, report generation, examples, and CLI.
 - TDD proposals, docs, and light CI matrix.
 - Release hygiene note: Do not push unless the user explicitly asks.
+- PyPI publish workflow using trusted publishing, plus `docs/releasing.md`.
 
 ### Changed
 

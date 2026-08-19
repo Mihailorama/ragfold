@@ -137,6 +137,14 @@ ragfold = "ragfold.cli:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src/ragfold"]
 
+[tool.hatch.build.targets.sdist]
+# .claude contains symlinks to local tooling outside the repo; shipping it
+# (or CI config) in the sdist breaks the build and bloats the archive.
+exclude = [
+    ".claude",
+    ".github",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
