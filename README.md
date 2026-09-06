@@ -33,6 +33,7 @@ ragfold compare examples/corpus.json examples/queries.json --engines text-rag,bm
 | `colqwen2` | gated | visual | yes | local VLM | code/model-dependent | late-interaction | no | slow | free infra cost |
 | `pixelrag` | gated | visual | yes | local/VLM | research/model-dependent | visual embedding | no | slow | free infra cost |
 | `dse` | gated | visual | yes | local | research/model-dependent | screenshot embedding | no | medium | free infra cost |
+| `wemm` | gated | multimodal | yes | local VLM | Apache-2.0 | dense single-vector (Matryoshka) | no | slow | free infra cost |
 | `lightrag` | gated | text | yes | local/framework | MIT | graph-hybrid RAG | framework-dependent | medium | infra/provider-dependent |
 | `rag-anything` | gated | multimodal | no | local/VLM framework | MIT | multimodal document RAG | framework-dependent | slow | infra/provider-dependent |
 | `agentic-file-search` | gated | text/documents | no | SaaS/agentic | project-dependent | agentic file search | no | slow | paid tokens |
@@ -55,6 +56,7 @@ credentials, and runtime are configured.
 | Need reranking after first-stage retrieval | Cross-encoder or Cohere Rerank adapters |
 | PDFs where layout matters and OCR should be avoided | `colpali` or `colqwen2` |
 | Screenshot/page-image retrieval experiments | `pixelrag` or `dse` |
+| Unified text + image + video + visual-document retrieval in one space, with truncatable (Matryoshka) dimensions | `wemm` |
 | Graph/hybrid RAG experiment from the LightRAG family | `lightrag` |
 | Multimodal document RAG over text, images, tables, equations | `rag-anything` |
 | Dynamic file exploration with citations instead of pre-built vectors | `agentic-file-search` |
@@ -84,6 +86,7 @@ credentials, and runtime are configured.
 | `cohere` | Cohere SDK | You have `COHERE_API_KEY` for Embed/Rerank |
 | `voyage` | Voyage AI SDK | You have `VOYAGE_API_KEY` |
 | `colpali`, `colqwen2` | ColPali engine stack | You can run visual document retrievers |
+| `wemm` | torch + transformers + pillow | You want the WeMM-Embedding unified multimodal embedder (Apache-2.0, weights from Hugging Face) |
 | `lightrag` | LightRAG package | You want HKUDS LightRAG as a gated framework retriever |
 | `rag-anything` | RAG-Anything package | You want multimodal document RAG experiments |
 | `agentic-file-search` | source-installed agentic search package | You want tool-using document search |

@@ -247,6 +247,7 @@ def default_engine_factories() -> dict[str, type[RagEngine]]:
     )
     from ragfold.engines.text_rag import TextRagEngine
     from ragfold.engines.visual import ColPaliEngine, ColQwen2Engine, DSEEngine, PixelRAGEngine
+    from ragfold.engines.wemm import WeMMEmbeddingEngine
 
     return {
         "bm25": BM25Engine,
@@ -259,6 +260,7 @@ def default_engine_factories() -> dict[str, type[RagEngine]]:
         "colqwen2": ColQwen2Engine,
         "pixelrag": PixelRAGEngine,
         "dse": DSEEngine,
+        "wemm": WeMMEmbeddingEngine,
         "lightrag": LightRAGEngine,
         "rag-anything": RAGAnythingEngine,
         "agentic-file-search": AgenticFileSearchEngine,

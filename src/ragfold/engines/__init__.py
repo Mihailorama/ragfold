@@ -22,6 +22,7 @@ from ragfold.engines.github_rag import AgenticFileSearchEngine, LightRAGEngine, 
 from ragfold.engines.router import EngineRouter, default_engine_factories
 from ragfold.engines.text_rag import TextRagEngine
 from ragfold.engines.visual import ColPaliEngine, ColQwen2Engine, DSEEngine, PixelRAGEngine
+from ragfold.engines.wemm import WeMMEmbeddingEngine
 
 DEFAULT_ENGINE_NAMES = list(default_engine_factories())
 
@@ -55,5 +56,6 @@ __all__ = [
     "TextRagEngine",
     "TxtAIEngine",
     "VoyageEmbedEngine",
+    "WeMMEmbeddingEngine",
     "build_default_router",
 ]

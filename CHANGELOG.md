@@ -13,6 +13,7 @@ and this project follows semantic versioning once published.
 - Offline lexical engines: `text-rag` TF-IDF and `bm25`.
 - Gated dense adapters for sentence-transformers, OpenAI, Cohere Embed, and Voyage.
 - Gated OCR-free visual adapters for ColPali, ColQwen2, PixelRAG, and DSE.
+- Gated `wemm` adapter for WeMM-Embedding (Tencent/WeChat, Apache-2.0): unified multimodal dense retrieval with optional Matryoshka `truncate_dim`.
 - In-memory vector store plus gated FAISS, Qdrant, Chroma, and pgvector adapters.
 - Optional reranker interfaces for cross-encoder and Cohere Rerank.
 - Framework stubs for LlamaIndex, Haystack, and txtai.

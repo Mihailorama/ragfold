@@ -61,6 +61,13 @@ pixelrag = [
 dse = [
     # Document Screenshot Embedding implementations vary by research release.
 ]
+wemm = [
+    # WeMM-Embedding (Tencent/WeChat, Apache-2.0) loads via transformers with
+    # trust_remote_code; weights are downloaded from Hugging Face, not pinned here.
+    "torch>=2.1",
+    "transformers>=4.44",
+    "pillow>=10.0",
+]
 faiss = [
     "faiss-cpu>=1.8",
 ]
