@@ -9,6 +9,23 @@ and this project follows semantic versioning once published.
 
 ### Added
 
+- Cross-engine hybrid retrieval with Reciprocal Rank Fusion: pure
+  `ragfold.fusion.reciprocal_rank_fusion(rankings, *, k=60, weights=None)`
+  (deterministic, stdlib-only, with an explainable per-engine contribution and
+  `consensus` breakdown) and `EngineRouter.retrieve_hybrid(..., engines=[...],
+  weights=None)` which runs multiple engines concurrently over one prepared
+  corpus and fuses them (`engine_name` like `rrf(bm25,text-rag)`). Public
+  contract unchanged.
+- Weighted fusion: optional per-engine `weights` (mapping or positional
+  sequence) scale each engine's RRF contribution.
+- Learnable weights: `ragfold.fusion_tuning.tune_rrf_weights(...)` grid-searches
+  per-engine weights against a labelled query set to maximise a retrieval
+  metric (deterministic, CI-light, uniform baseline always evaluated).
+- CLI `ragfold hybrid <corpus> <query> --engines ... [--k --top-k --weights]`.
+- MCP server (optional `mcp` extra, `ragfold-mcp` script) exposing
+  `ragfold_list_engines`, `ragfold_retrieve`, `ragfold_hybrid_search`, and
+  `ragfold_compare` so API, CLI, and MCP share one router and fusion. Works with
+  the mcp 1.x `FastMCP` and 2.x `MCPServer` class names.
 - Public `RagEngine` contract with `RetrievalResult` and `RagAnswer`.
 - Offline lexical engines: `text-rag` TF-IDF and `bm25`.
 - Gated dense adapters for sentence-transformers, OpenAI, Cohere Embed, and Voyage.
@@ -32,4 +49,6 @@ and this project follows semantic versioning once published.
 
 ### Fixed
 
-- No known fixes yet.
+- `mypy` clean across the whole package: annotated
+  `_UnavailableVectorStore._raise` as `NoReturn` so the gated vector-store
+  `add`/`query` methods type-check.

@@ -10,6 +10,7 @@ from typing import Any
 
 from ragfold.compression import ContextCompressor
 from ragfold.engines.base import CorpusInput, RagEngine, RetrievalResult, normalize_corpus
+from ragfold.fusion import reciprocal_rank_fusion
 from ragfold.preprocessing import Chunker
 from ragfold.rerankers import BaseReranker
 
@@ -92,6 +93,102 @@ class EngineRouter:
     ) -> RetrievalResult:
         engine = self.select(engine_hint=engine_hint)
         return await self._retrieve_with_engine(engine, corpus, query, top_k=top_k, **kwargs)
+
+    async def retrieve_hybrid(
+        self,
+        corpus: CorpusInput,
+        query: str,
+        *,
+        engines: list[str],
+        top_k: int = 5,
+        k: int = 60,
+        weights: Mapping[str, float] | None = None,
+        concurrency: int = 4,
+        **kwargs: Any,
+    ) -> RetrievalResult:
+        """Run several engines concurrently and fuse them with RRF.
+
+        This sits above `select()` (which returns a single engine). Unknown
+        engine names raise `ValueError`; unavailable engines are skipped and
+        recorded in metadata. The corpus is prepared once so every engine sees
+        identical document ids, then any configured reranker/compressor runs on
+        the fused passages exactly as the single-engine path does.
+
+        `weights` optionally biases the fusion per engine (mapping keyed by
+        engine name; missing engines default to 1.0).
+        """
+
+        if not engines:
+            raise ValueError("retrieve_hybrid requires at least one engine name.")
+
+        selected: list[RagEngine] = []
+        skipped: list[str] = []
+        for name in engines:
+            engine = self._engines.get(name)
+            if engine is None:
+                raise ValueError(f"Unknown engine '{name}'")
+            if engine.is_available():
+                selected.append(engine)
+            else:
+                skipped.append(name)
+
+        if not selected:
+            raise ValueError(
+                "No available engines for hybrid retrieval among: " + ", ".join(engines)
+            )
+
+        start = time.perf_counter()
+        prepared_corpus, prep_metadata = self._prepare_corpus(corpus)
+
+        semaphore = asyncio.Semaphore(max(1, concurrency))
+
+        async def _run(engine: RagEngine) -> RetrievalResult:
+            async with semaphore:
+                return await engine.retrieve(prepared_corpus, query, top_k=top_k, **kwargs)
+
+        engine_results = await asyncio.gather(*[_run(engine) for engine in selected])
+
+        rankings = {
+            engine.name: result.passages
+            for engine, result in zip(selected, engine_results, strict=True)
+        }
+        fused = reciprocal_rank_fusion(rankings, k=k, weights=weights)[: max(top_k, 0)]
+
+        ran_names = [engine.name for engine in selected]
+        resolved_weights = {
+            name: float(weights[name]) if weights and name in weights else 1.0
+            for name in ran_names
+        }
+        result = RetrievalResult(
+            engine_name=f"rrf({','.join(ran_names)})",
+            query=query,
+            passages=fused,
+            metadata={
+                **prep_metadata,
+                "fusion": {
+                    "method": "rrf",
+                    "k": k,
+                    "engines": ran_names,
+                    "skipped_engines": skipped,
+                    "weights": resolved_weights,
+                    "per_engine": {
+                        engine.name: len(res.passages)
+                        for engine, res in zip(selected, engine_results, strict=True)
+                    },
+                },
+            },
+            token_cost=sum(res.token_cost for res in engine_results),
+        )
+
+        if self.reranker and self.reranker.is_available() and result.passages:
+            result.passages = self.reranker.rerank(query, result.passages)
+            result.metadata["reranker"] = self.reranker.__class__.__name__
+        if self.compressor and self.compressor.is_available() and result.passages:
+            result.passages = self.compressor.compress(result.passages, query=query)
+            result.metadata["compressor"] = self.compressor.__class__.__name__
+
+        result.processing_time_ms = int((time.perf_counter() - start) * 1000)
+        return result
 
     async def _retrieve_with_engine(
         self,

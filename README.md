@@ -60,6 +60,7 @@ credentials, and runtime are configured.
 | Graph/hybrid RAG experiment from the LightRAG family | `lightrag` |
 | Multimodal document RAG over text, images, tables, equations | `rag-anything` |
 | Dynamic file exploration with citations instead of pre-built vectors | `agentic-file-search` |
+| Combine keyword + semantic rankings without tuning score scales | `EngineRouter.retrieve_hybrid([...])` (Reciprocal Rank Fusion) |
 | Better chunks before retrieval | `RecursiveChunker` or `AdaptiveChunker` |
 | Compress retrieved passages before sending to an LLM | `NoopCompressor` or `HeadroomCompressor` |
 | Already invested in a RAG framework | `llamaindex`, `haystack`, or `txtai` |
@@ -96,6 +97,7 @@ credentials, and runtime are configured.
 | `promptfoo` | Promptfoo package | You want benchmark export for LLM/RAG eval workflows |
 | `faiss`, `qdrant`, `chroma`, `pgvector` | vector-store clients | You need persistent or accelerated vector search |
 | `llamaindex`, `haystack`, `txtai` | framework clients | You want thin wrappers over existing retrievers |
+| `mcp` | MCP SDK | You want to expose ragfold to AI agents over the Model Context Protocol (`ragfold-mcp`) |
 | `dev` | pytest, ruff, mypy | Local development and CI |
 
 Examples:
@@ -134,6 +136,32 @@ async def main():
     )
     print(comparison.keys())
 
+    # Hybrid retrieval: run several engines and merge their rankings with
+    # Reciprocal Rank Fusion (RRF). Fuses ranks, not raw scores, so lexical and
+    # dense engines combine without score calibration.
+    hybrid = await router.retrieve_hybrid(
+        corpus, "refund policy", engines=["bm25", "text-rag"], top_k=1
+    )
+    print(hybrid.engine_name)  # rrf(bm25,text-rag)
+    print(hybrid.passages[0].metadata["fusion"])  # per-engine contribution breakdown
+
+    # Bias the fusion per engine, or learn the weights from a labelled set.
+    from ragfold import tune_rrf_weights
+
+    weighted = await router.retrieve_hybrid(
+        corpus, "refund policy", engines=["bm25", "text-rag"], weights={"bm25": 2.0}
+    )
+    print(weighted.metadata["fusion"]["weights"])  # {'bm25': 2.0, 'text-rag': 1.0}
+
+    tuned = await tune_rrf_weights(
+        router,
+        corpus,
+        [{"id": "q1", "query": "refund policy", "relevant_ids": ["policy"]}],
+        engines=["bm25", "text-rag"],
+        top_k=1,
+    )
+    print(tuned.weights, tuned.score)  # best per-engine weights + mean nDCG
+
 
 asyncio.run(main())
 ```
@@ -160,10 +188,27 @@ engine = LightRAGEngine(
 ragfold list-engines
 ragfold compare examples/corpus.json examples/queries.json --engines text-rag,bm25 --top-k 1
 ragfold bench examples --engines text-rag,bm25
+ragfold hybrid examples/corpus.json "refund policy" --engines bm25,text-rag --top-k 5
+ragfold hybrid examples/corpus.json "refund policy" --engines bm25,text-rag --weights bm25=2,text-rag=1
 ```
 
 `corpus.json` is a list of objects with `id` and `text`. `queries.json` is a list
 of objects with `id`, `query`, `relevant_ids`, and optional `answers`.
+
+## MCP
+
+The same capabilities are exposed to AI agents over the Model Context Protocol.
+Install the extra and run the stdio server:
+
+```bash
+pip install "ragfold[mcp]"
+ragfold-mcp
+```
+
+Tools: `ragfold_list_engines`, `ragfold_retrieve`, `ragfold_hybrid_search`
+(Reciprocal Rank Fusion, with optional per-engine `weights`), and
+`ragfold_compare`. Every retrieval surface - API, CLI, MCP - shares one router
+and one fusion implementation.
 
 ## Evaluation
 

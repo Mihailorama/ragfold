@@ -69,6 +69,92 @@ async def test_process_batch_uses_bounded_concurrency():
     assert not batch.errors
 
 
+@pytest.mark.asyncio
+async def test_retrieve_hybrid_fuses_multiple_engines():
+    router = EngineRouter([BM25Engine(), TextRagEngine()])
+
+    result = await router.retrieve_hybrid(
+        CORPUS, "invoice", engines=["bm25", "text-rag"], top_k=2
+    )
+
+    assert isinstance(result, RetrievalResult)
+    assert result.engine_name == "rrf(bm25,text-rag)"
+    # Both engines rank "a" first for "invoice"; it wins the fusion by consensus.
+    assert result.passages[0].document_id == "a"
+    assert result.passages[0].metadata["fusion"]["consensus"] == 2
+    assert result.metadata["fusion"]["engines"] == ["bm25", "text-rag"]
+    assert result.metadata["fusion"]["k"] == 60
+
+
+@pytest.mark.asyncio
+async def test_retrieve_hybrid_rejects_unknown_engine():
+    router = EngineRouter([BM25Engine(), TextRagEngine()])
+
+    with pytest.raises(ValueError, match="Unknown engine"):
+        await router.retrieve_hybrid(CORPUS, "invoice", engines=["bm25", "nope"])
+
+
+@pytest.mark.asyncio
+async def test_retrieve_hybrid_requires_at_least_one_engine():
+    router = EngineRouter([BM25Engine(), TextRagEngine()])
+
+    with pytest.raises(ValueError):
+        await router.retrieve_hybrid(CORPUS, "invoice", engines=[])
+
+
+class UnavailableTextEngine(TextRagEngine):
+    @property
+    def name(self):
+        return "offline-text"
+
+    def is_available(self):
+        return False
+
+
+@pytest.mark.asyncio
+async def test_retrieve_hybrid_skips_unavailable_engines():
+    router = EngineRouter([BM25Engine(), UnavailableTextEngine()])
+
+    result = await router.retrieve_hybrid(
+        CORPUS, "invoice", engines=["bm25", "offline-text"], top_k=2
+    )
+
+    assert result.engine_name == "rrf(bm25)"
+    assert result.metadata["fusion"]["engines"] == ["bm25"]
+    assert result.metadata["fusion"]["skipped_engines"] == ["offline-text"]
+
+
+@pytest.mark.asyncio
+async def test_retrieve_hybrid_raises_when_all_engines_unavailable():
+    router = EngineRouter([UnavailableTextEngine()])
+
+    with pytest.raises(ValueError, match="No available"):
+        await router.retrieve_hybrid(CORPUS, "invoice", engines=["offline-text"])
+
+
+@pytest.mark.asyncio
+async def test_retrieve_hybrid_prepares_corpus_once_and_applies_reranker():
+    router = EngineRouter(
+        [BM25Engine(), TextRagEngine()],
+        chunker=RecursiveChunker(chunk_size=2, chunk_overlap=0),
+        reranker=ReverseReranker(),
+    )
+
+    result = await router.retrieve_hybrid(
+        [{"id": "doc", "text": "alpha beta gamma"}],
+        "gamma",
+        engines=["bm25", "text-rag"],
+        top_k=3,
+    )
+
+    # Chunker ran (once) so fused ids are chunk ids shared by both engines.
+    assert result.metadata["chunker"] == "RecursiveChunker"
+    assert all("#chunk-" in p.document_id for p in result.passages)
+    # Reranker applied after fusion, ranks recomputed contiguously.
+    assert result.metadata["reranker"] == "ReverseReranker"
+    assert [p.rank for p in result.passages] == list(range(1, len(result.passages) + 1))
+
+
 class ReverseReranker(BaseReranker):
     def is_available(self):
         return True

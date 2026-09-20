@@ -117,6 +117,9 @@ rerank-cross-encoder = [
 rerank-cohere = [
     "cohere>=5.0",
 ]
+mcp = [
+    "mcp>=1.0",
+]
 evaluation = []
 test = [
     "pytest>=7.0",
@@ -128,7 +131,7 @@ dev = [
     "ragfold[test]",
 ]
 all = [
-    "ragfold[bm25,sentence-transformers,openai,cohere,voyage,colpali,colqwen2,faiss,qdrant,chroma,pgvector,llamaindex,haystack,txtai,lightrag,rag-anything,adaptive-chunking,headroom,cocoindex,agentic-file-search,promptfoo,rerank-cross-encoder,rerank-cohere,evaluation]",
+    "ragfold[bm25,sentence-transformers,openai,cohere,voyage,colpali,colqwen2,faiss,qdrant,chroma,pgvector,llamaindex,haystack,txtai,lightrag,rag-anything,adaptive-chunking,headroom,cocoindex,agentic-file-search,promptfoo,rerank-cross-encoder,rerank-cohere,mcp,evaluation]",
 ]
 
 [project.urls]
@@ -140,6 +143,7 @@ Changelog = "https://github.com/mihailorama/ragfold/blob/main/CHANGELOG.md"
 
 [project.scripts]
 ragfold = "ragfold.cli:main"
+ragfold-mcp = "ragfold.mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ragfold"]
