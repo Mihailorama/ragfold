@@ -51,6 +51,42 @@ def test_bench_accepts_examples_dataset(capsys):
     assert "text-rag" in output
 
 
+def test_hybrid_prints_fused_ranking(tmp_path, capsys):
+    corpus = tmp_path / "corpus.json"
+    corpus.write_text(
+        json.dumps([
+            {"id": "paris", "text": "Paris is the capital of France."},
+            {"id": "pip", "text": "pip installs Python packages."},
+        ]),
+        encoding="utf-8",
+    )
+
+    main(["hybrid", str(corpus), "France capital", "--engines", "text-rag,bm25", "--top-k", "1"])
+
+    output = capsys.readouterr().out
+    assert "rrf(text-rag,bm25)" in output
+    assert "paris" in output
+
+
+def test_hybrid_accepts_weights(tmp_path, capsys):
+    corpus = tmp_path / "corpus.json"
+    corpus.write_text(
+        json.dumps([
+            {"id": "paris", "text": "Paris is the capital of France."},
+            {"id": "pip", "text": "pip installs Python packages."},
+        ]),
+        encoding="utf-8",
+    )
+
+    main([
+        "hybrid", str(corpus), "France capital",
+        "--engines", "text-rag,bm25", "--top-k", "1", "--weights", "text-rag=2,bm25=1",
+    ])
+
+    output = capsys.readouterr().out
+    assert "paris" in output
+
+
 def test_no_args_prints_help(capsys):
     with pytest.raises(SystemExit) as exc_info:
         main([])

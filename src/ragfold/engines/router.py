@@ -102,6 +102,7 @@ class EngineRouter:
         engines: list[str],
         top_k: int = 5,
         k: int = 60,
+        weights: Mapping[str, float] | None = None,
         concurrency: int = 4,
         **kwargs: Any,
     ) -> RetrievalResult:
@@ -112,6 +113,9 @@ class EngineRouter:
         recorded in metadata. The corpus is prepared once so every engine sees
         identical document ids, then any configured reranker/compressor runs on
         the fused passages exactly as the single-engine path does.
+
+        `weights` optionally biases the fusion per engine (mapping keyed by
+        engine name; missing engines default to 1.0).
         """
 
         if not engines:
@@ -148,9 +152,13 @@ class EngineRouter:
             engine.name: result.passages
             for engine, result in zip(selected, engine_results, strict=True)
         }
-        fused = reciprocal_rank_fusion(rankings, k=k)[: max(top_k, 0)]
+        fused = reciprocal_rank_fusion(rankings, k=k, weights=weights)[: max(top_k, 0)]
 
         ran_names = [engine.name for engine in selected]
+        resolved_weights = {
+            name: float(weights[name]) if weights and name in weights else 1.0
+            for name in ran_names
+        }
         result = RetrievalResult(
             engine_name=f"rrf({','.join(ran_names)})",
             query=query,
@@ -162,6 +170,7 @@ class EngineRouter:
                     "k": k,
                     "engines": ran_names,
                     "skipped_engines": skipped,
+                    "weights": resolved_weights,
                     "per_engine": {
                         engine.name: len(res.passages)
                         for engine, res in zip(selected, engine_results, strict=True)

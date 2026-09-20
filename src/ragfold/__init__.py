@@ -12,6 +12,7 @@ from ragfold.engines.base import (
 )
 from ragfold.engines.router import EngineRouter
 from ragfold.fusion import reciprocal_rank_fusion
+from ragfold.fusion_tuning import TuneResult, tune_rrf_weights
 
 __all__ = [
     "DocumentChunk",
@@ -21,7 +22,9 @@ __all__ = [
     "RagEngine",
     "RetrievedPassage",
     "RetrievalResult",
+    "TuneResult",
     "reciprocal_rank_fusion",
+    "tune_rrf_weights",
 ]
 
 __version__ = "0.1.0"

@@ -67,8 +67,8 @@ def test_contributions_record_engine_name_rank_and_term():
     contributions = d2.metadata["fusion"]["contributions"]
     # Sorted by rank then engine name: dense (rank 1) before bm25 (rank 2).
     assert contributions == [
-        {"engine": "dense", "rank": 1, "score": pytest.approx(1 / 61)},
-        {"engine": "bm25", "rank": 2, "score": pytest.approx(1 / 62)},
+        {"engine": "dense", "rank": 1, "weight": 1.0, "score": pytest.approx(1 / 61)},
+        {"engine": "bm25", "rank": 2, "weight": 1.0, "score": pytest.approx(1 / 62)},
     ]
     assert d2.metadata["fusion"]["method"] == "rrf"
     assert d2.metadata["fusion"]["k"] == 60
@@ -130,6 +130,53 @@ def test_empty_inputs_return_empty_list():
     assert reciprocal_rank_fusion([]) == []
     assert reciprocal_rank_fusion([[]]) == []
     assert reciprocal_rank_fusion({"bm25": [], "dense": []}) == []
+
+
+def test_weights_mapping_scales_each_engine_contribution():
+    bm25 = [passage("d1", 1), passage("d2", 2)]
+    dense = [passage("d2", 1)]
+
+    fused = reciprocal_rank_fusion(
+        {"bm25": bm25, "dense": dense}, k=60, weights={"bm25": 2.0, "dense": 1.0}
+    )
+    by_id = {p.document_id: p for p in fused}
+
+    # d1: bm25 rank 1 * 2.0                 = 2/61
+    # d2: bm25 rank 2 * 2.0 + dense rank 1  = 2/62 + 1/61
+    assert by_id["d1"].score == pytest.approx(2 / 61)
+    assert by_id["d2"].score == pytest.approx(2 / 62 + 1 / 61)
+    assert [p.document_id for p in fused] == ["d2", "d1"]
+    # Contribution records the applied weight and the weighted term.
+    d1_contrib = by_id["d1"].metadata["fusion"]["contributions"][0]
+    assert d1_contrib["weight"] == 2.0
+    assert d1_contrib["score"] == pytest.approx(2 / 61)
+
+
+def test_weights_sequence_is_positional():
+    engine_a = [passage("p", 1)]
+    engine_b = [passage("q", 1)]
+
+    fused = reciprocal_rank_fusion([engine_a, engine_b], weights=[3.0, 1.0])
+    by_id = {p.document_id: p for p in fused}
+
+    assert by_id["p"].score == pytest.approx(3 / 61)
+    assert by_id["q"].score == pytest.approx(1 / 61)
+
+
+def test_missing_engine_weight_defaults_to_one():
+    bm25 = [passage("d1", 1)]
+    dense = [passage("d2", 1)]
+
+    fused = reciprocal_rank_fusion({"bm25": bm25, "dense": dense}, weights={"bm25": 5.0})
+    by_id = {p.document_id: p for p in fused}
+
+    assert by_id["d1"].score == pytest.approx(5 / 61)
+    assert by_id["d2"].score == pytest.approx(1 / 61)  # dense defaults to weight 1.0
+
+
+def test_weights_sequence_length_mismatch_raises():
+    with pytest.raises(ValueError, match="weights"):
+        reciprocal_rank_fusion([[passage("d1", 1)], [passage("d2", 1)]], weights=[1.0])
 
 
 def test_duplicate_document_within_one_engine_is_not_double_counted():

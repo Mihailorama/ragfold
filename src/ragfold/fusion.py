@@ -18,6 +18,7 @@ from collections.abc import Mapping, Sequence
 from ragfold.engines.base import RetrievedPassage
 
 Rankings = Mapping[str, Sequence[RetrievedPassage]] | Sequence[Sequence[RetrievedPassage]]
+Weights = Mapping[str, float] | Sequence[float]
 
 
 def _labelled_rankings(rankings: Rankings) -> list[tuple[str, Sequence[RetrievedPassage]]]:
@@ -28,10 +29,30 @@ def _labelled_rankings(rankings: Rankings) -> list[tuple[str, Sequence[Retrieved
     return [(f"engine-{idx}", ranking) for idx, ranking in enumerate(rankings)]
 
 
+def _resolve_weights(
+    labelled: list[tuple[str, Sequence[RetrievedPassage]]],
+    weights: Weights | None,
+) -> dict[str, float]:
+    """Resolve per-engine weights, defaulting missing engines to 1.0."""
+
+    if weights is None:
+        return {name: 1.0 for name, _ in labelled}
+    if isinstance(weights, Mapping):
+        return {name: float(weights.get(name, 1.0)) for name, _ in labelled}
+    weight_list = list(weights)
+    if len(weight_list) != len(labelled):
+        raise ValueError(
+            f"weights sequence has {len(weight_list)} entries but there are "
+            f"{len(labelled)} rankings; pass one weight per ranking or a mapping."
+        )
+    return {name: float(weight) for (name, _), weight in zip(labelled, weight_list, strict=True)}
+
+
 def reciprocal_rank_fusion(
     rankings: Rankings,
     *,
     k: int = 60,
+    weights: Weights | None = None,
 ) -> list[RetrievedPassage]:
     """Fuse several ranked passage lists into one with Reciprocal Rank Fusion.
 
@@ -42,6 +63,10 @@ def reciprocal_rank_fusion(
             the passage's position in the list (1-based) is the rank RRF uses.
         k: The RRF damping constant. Larger ``k`` flattens the contribution of
             top ranks. The canonical default is 60.
+        weights: Optional per-engine multipliers. A mapping keyed by engine
+            name (missing engines default to 1.0) or a sequence of one weight
+            per ranking. Each engine's contribution term becomes
+            ``weight * 1/(k + rank)``. Defaults to uniform weight 1.0.
 
     Returns:
         A new list of :class:`RetrievedPassage`, one per unique
@@ -58,16 +83,18 @@ def reciprocal_rank_fusion(
     """
 
     labelled = _labelled_rankings(rankings)
+    weight_by_engine = _resolve_weights(labelled, weights)
 
     scores: dict[str, float] = {}
     consensus: dict[str, int] = {}
     min_rank: dict[str, int] = {}
-    # Internal contribution tuples: (rank, engine_name, term) - typed so the
-    # later sort key is comparable.
-    contributions: dict[str, list[tuple[int, str, float]]] = {}
+    # Internal contribution tuples: (rank, engine_name, weight, term) - typed so
+    # the later sort key is comparable.
+    contributions: dict[str, list[tuple[int, str, float, float]]] = {}
     representative: dict[str, tuple[int, int, RetrievedPassage]] = {}
 
     for engine_index, (engine_name, ranking) in enumerate(labelled):
+        weight = weight_by_engine[engine_name]
         seen: set[str] = set()
         for position, passage in enumerate(ranking, start=1):
             doc_id = passage.document_id
@@ -76,11 +103,11 @@ def reciprocal_rank_fusion(
                 continue
             seen.add(doc_id)
 
-            term = 1.0 / (k + position)
+            term = weight * (1.0 / (k + position))
             scores[doc_id] = scores.get(doc_id, 0.0) + term
             consensus[doc_id] = consensus.get(doc_id, 0) + 1
             min_rank[doc_id] = min(min_rank.get(doc_id, position), position)
-            contributions.setdefault(doc_id, []).append((position, engine_name, term))
+            contributions.setdefault(doc_id, []).append((position, engine_name, weight, term))
 
             # Representative view: best (lowest) rank wins; ties -> earlier engine.
             candidate = (position, engine_index, passage)
@@ -102,8 +129,8 @@ def reciprocal_rank_fusion(
     for new_rank, doc_id in enumerate(ordered_ids, start=1):
         source = representative[doc_id][2]
         engine_contributions = [
-            {"engine": engine_name, "rank": rank, "score": term}
-            for rank, engine_name, term in sorted(contributions[doc_id])
+            {"engine": engine_name, "rank": rank, "weight": weight, "score": term}
+            for rank, engine_name, weight, term in sorted(contributions[doc_id])
         ]
         metadata = dict(source.metadata)
         metadata["fusion"] = {

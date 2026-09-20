@@ -109,8 +109,31 @@ mypy src/ragfold/fusion.py src/ragfold/engines/router.py
   occurrence wins for that engine; it is not double-counted.
 - All named engines unavailable: `ValueError`.
 
+## Follow-up additions (same PR)
+Per the product rule that API, CLI, and MCP ship together, and to cover
+weighting, the initial router-only scope was extended:
+
+- **Weighted fusion.** `reciprocal_rank_fusion(..., weights=...)` and
+  `retrieve_hybrid(..., weights=...)` accept per-engine weights (mapping or
+  positional sequence); each contribution term becomes `weight * 1/(k+rank)`.
+  The applied weight is recorded in each contribution and in
+  `metadata["fusion"]["weights"]`.
+- **Learnable weights.** `ragfold.fusion_tuning.tune_rrf_weights(...)` -
+  deterministic grid search over a candidate-weight grid, maximising a
+  retrieval metric on a labelled query set. Stdlib + existing metrics only; the
+  uniform baseline is always in the grid.
+- **CLI.** `ragfold hybrid <corpus> <query> --engines ... [--k --top-k
+  --weights]`.
+- **MCP.** `src/ragfold/mcp_server.py` with plain async tool functions (no SDK
+  dependency, unit-tested) and a gated `build_server()` that imports the SDK
+  lazily (supports mcp 1.x `FastMCP` and 2.x `MCPServer`). New `mcp` optional
+  extra and `ragfold-mcp` console script.
+- **Typing.** Annotated `_UnavailableVectorStore._raise` as `NoReturn` so the
+  package is `mypy`-clean end to end.
+
 ## Out of Scope
-- CLI surface for hybrid retrieval (router API only for now).
-- Weighted/learned fusion; per-engine weights.
 - Changing `RagEngine` / `RetrievalResult` / `RagAnswer` signatures.
-- Adding any dependency (RRF is stdlib arithmetic).
+- Adding any runtime dependency (RRF is stdlib arithmetic; MCP is an optional
+  extra, imported lazily).
+- Gradient-trained/model-based fusion (the tuner is a deterministic grid
+  search, not an ML model).

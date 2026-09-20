@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib.util
 import math
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import Any, NoReturn, Protocol
 
 
 @dataclass
@@ -78,7 +78,7 @@ class _UnavailableVectorStore:
     def query(self, vector: list[float], top_k: int = 5) -> list[VectorRecord]:
         self._raise()
 
-    def _raise(self) -> None:
+    def _raise(self) -> NoReturn:
         raise NotImplementedError(
             f"Install ragfold[{self.extra_name}] and configure the backing service before use."
         )

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import sys
 from pathlib import Path
 
@@ -36,6 +37,19 @@ def main(argv: list[str] | None = None) -> None:
     bench_p.add_argument("--engines", help="Comma-separated engine names")
     bench_p.add_argument("--top-k", type=int, default=5)
 
+    hybrid_p = sub.add_parser(
+        "hybrid", help="Fuse several engines for one query with Reciprocal Rank Fusion"
+    )
+    hybrid_p.add_argument("corpus", help="Path to corpus JSON")
+    hybrid_p.add_argument("query", help="Query text")
+    hybrid_p.add_argument("--engines", help="Comma-separated engine names", required=True)
+    hybrid_p.add_argument("--top-k", type=int, default=5)
+    hybrid_p.add_argument("--k", type=int, default=60, help="RRF damping constant")
+    hybrid_p.add_argument(
+        "--weights",
+        help="Comma-separated per-engine weights, e.g. 'bm25=2,text-rag=1'",
+    )
+
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
@@ -46,6 +60,8 @@ def main(argv: list[str] | None = None) -> None:
         asyncio.run(_cmd_compare(args))
     elif args.command == "bench":
         asyncio.run(_cmd_bench(args))
+    elif args.command == "hybrid":
+        asyncio.run(_cmd_hybrid(args))
 
 
 def _build_router() -> EngineRouter:
@@ -80,6 +96,39 @@ async def _cmd_bench(args: argparse.Namespace) -> None:
     engines = _split_engines(args.engines)
     report = await EvaluationRunner(router).run(dataset, engines=engines, top_k=args.top_k)
     print(report.to_markdown())
+
+
+async def _cmd_hybrid(args: argparse.Namespace) -> None:
+    corpus = json.loads(Path(args.corpus).read_text(encoding="utf-8"))
+    engines = _split_engines(args.engines) or []
+    weights = _parse_weights(args.weights)
+    router = _build_router()
+    result = await router.retrieve_hybrid(
+        corpus, args.query, engines=engines, top_k=args.top_k, k=args.k, weights=weights
+    )
+    print(f"Hybrid retrieval: {result.engine_name}")
+    print("| rank | document_id | score | consensus | engines |")
+    print("| --- | --- | --- | --- | --- |")
+    for passage in result.passages:
+        fusion = passage.metadata.get("fusion", {})
+        contributors = ",".join(c["engine"] for c in fusion.get("contributions", []))
+        print(
+            f"| {passage.rank} | {passage.document_id} | {passage.score:.6f} | "
+            f"{fusion.get('consensus', '')} | {contributors} |"
+        )
+
+
+def _parse_weights(value: str | None) -> dict[str, float] | None:
+    if not value:
+        return None
+    weights: dict[str, float] = {}
+    for item in value.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        name, _, raw = item.partition("=")
+        weights[name.strip()] = float(raw)
+    return weights or None
 
 
 def _split_engines(value: str | None) -> list[str] | None:
