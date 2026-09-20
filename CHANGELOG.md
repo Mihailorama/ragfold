@@ -9,6 +9,12 @@ and this project follows semantic versioning once published.
 
 ### Added
 
+- Cross-engine hybrid retrieval with Reciprocal Rank Fusion: pure
+  `ragfold.fusion.reciprocal_rank_fusion(rankings, *, k=60)` (deterministic,
+  stdlib-only, with an explainable per-engine contribution and `consensus`
+  breakdown) and `EngineRouter.retrieve_hybrid(..., engines=[...])` which runs
+  multiple engines concurrently over one prepared corpus and fuses them
+  (`engine_name` like `rrf(bm25,text-rag)`). Public contract unchanged.
 - Public `RagEngine` contract with `RetrievalResult` and `RagAnswer`.
 - Offline lexical engines: `text-rag` TF-IDF and `bm25`.
 - Gated dense adapters for sentence-transformers, OpenAI, Cohere Embed, and Voyage.

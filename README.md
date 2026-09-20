@@ -60,6 +60,7 @@ credentials, and runtime are configured.
 | Graph/hybrid RAG experiment from the LightRAG family | `lightrag` |
 | Multimodal document RAG over text, images, tables, equations | `rag-anything` |
 | Dynamic file exploration with citations instead of pre-built vectors | `agentic-file-search` |
+| Combine keyword + semantic rankings without tuning score scales | `EngineRouter.retrieve_hybrid([...])` (Reciprocal Rank Fusion) |
 | Better chunks before retrieval | `RecursiveChunker` or `AdaptiveChunker` |
 | Compress retrieved passages before sending to an LLM | `NoopCompressor` or `HeadroomCompressor` |
 | Already invested in a RAG framework | `llamaindex`, `haystack`, or `txtai` |
@@ -133,6 +134,15 @@ async def main():
         top_k=1,
     )
     print(comparison.keys())
+
+    # Hybrid retrieval: run several engines and merge their rankings with
+    # Reciprocal Rank Fusion (RRF). Fuses ranks, not raw scores, so lexical and
+    # dense engines combine without score calibration.
+    hybrid = await router.retrieve_hybrid(
+        corpus, "refund policy", engines=["bm25", "text-rag"], top_k=1
+    )
+    print(hybrid.engine_name)  # rrf(bm25,text-rag)
+    print(hybrid.passages[0].metadata["fusion"])  # per-engine contribution breakdown
 
 
 asyncio.run(main())
