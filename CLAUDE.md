@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # ragfold
 
 Open-source Python RAG and information-extraction engine aggregator. Ragfold is
