@@ -3,6 +3,7 @@ purpose: "Optional docfold adapter: file to Markdown text for the ingestion pipe
 status: "OPEN"
 priority: "P2"
 created: "2026-11-09"
+plane: "RAGFOLD-3"
 ---
 
 # Feature: docfold Parse Adapter

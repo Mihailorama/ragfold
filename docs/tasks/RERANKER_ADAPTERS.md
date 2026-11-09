@@ -3,6 +3,7 @@ purpose: "LiteLLM and sentence-transformers CrossEncoder reranker adapters as op
 status: "OPEN"
 priority: "P2"
 created: "2026-11-09"
+plane: "RAGFOLD-17"
 ---
 
 # Feature: Reranker Adapters

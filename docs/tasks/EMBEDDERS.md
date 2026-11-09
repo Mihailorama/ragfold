@@ -3,6 +3,7 @@ purpose: "Async injectable Embedder protocol so model calls stay in the caller"
 status: "OPEN"
 priority: "P0"
 created: "2026-11-09"
+plane: "RAGFOLD-5"
 ---
 
 # Feature: Embedder Protocol

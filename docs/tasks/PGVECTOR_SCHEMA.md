@@ -3,6 +3,7 @@ purpose: "Export pgvector table/index DDL as data the app applies through its ow
 status: "OPEN"
 priority: "P0"
 created: "2026-11-09"
+plane: "RAGFOLD-10"
 ---
 
 # Feature: pgvector Schema Export

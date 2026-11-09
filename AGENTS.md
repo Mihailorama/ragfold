@@ -10,6 +10,13 @@
 - `docs/conventions/golden-rules.md` - non-negotiable project rules.
 - `examples/` - tiny offline corpus/query fixtures for CLI smoke tests.
 
+## Tracker
+
+Plane project `RAGFOLD` (`0e9f92ba-01ea-4070-b283-249b0f4e1172`, workspace `sg`) is the source of truth for
+tasks, tech debt and bugs. Every proposal in `docs/tasks/` carries its issue as `plane: "RAGFOLD-<n>"` in the
+front matter; a new proposal gets a Plane issue (Todo, assigned to the owner) in the same change. Only the owner
+moves an issue to Done.
+
 ## Build, Test, and Development Commands
 
 - `pip install -e ".[dev]"` - install package with dev tooling.

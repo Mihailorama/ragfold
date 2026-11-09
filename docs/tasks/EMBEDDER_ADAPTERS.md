@@ -3,6 +3,7 @@ purpose: "LiteLLM and sentence-transformers Embedder adapters as optional extras
 status: "OPEN"
 priority: "P2"
 created: "2026-11-09"
+plane: "RAGFOLD-6"
 ---
 
 # Feature: Embedder Adapters

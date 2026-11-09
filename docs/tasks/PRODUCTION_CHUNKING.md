@@ -3,6 +3,7 @@ purpose: "Structure- and token-aware Markdown chunking as a thin wrapper over la
 status: "OPEN"
 priority: "P0"
 created: "2026-11-09"
+plane: "RAGFOLD-12"
 ---
 
 # Feature: Production Chunking

@@ -3,6 +3,7 @@ purpose: "Rewire dense benchmark engines onto the async Embedder and VectorStore
 status: "OPEN"
 priority: "P2"
 created: "2026-06-20"
+plane: "RAGFOLD-2"
 ---
 
 # Feature: Dense Engines

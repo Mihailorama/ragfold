@@ -3,6 +3,7 @@ purpose: "Idempotent ingestion primitives: chunk, hash, embed only what changed,
 status: "OPEN"
 priority: "P0"
 created: "2026-11-09"
+plane: "RAGFOLD-7"
 ---
 
 # Feature: Ingestion Pipeline

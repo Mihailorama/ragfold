@@ -3,6 +3,7 @@ purpose: "Numbered context building and citation resolution for answers, with no
 status: "OPEN"
 priority: "P1"
 created: "2026-11-09"
+plane: "RAGFOLD-1"
 ---
 
 # Feature: Citations

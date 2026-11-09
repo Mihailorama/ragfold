@@ -3,6 +3,7 @@ purpose: "Guarantee ragfold never puts document, chunk or query text in logs or 
 status: "OPEN"
 priority: "P0"
 created: "2026-11-09"
+plane: "RAGFOLD-8"
 ---
 
 # Feature: No Content in Logs

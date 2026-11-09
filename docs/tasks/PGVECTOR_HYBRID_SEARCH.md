@@ -3,6 +3,7 @@ purpose: "Postgres full-text plus pgvector hybrid search with Reciprocal Rank Fu
 status: "OPEN"
 priority: "P0"
 created: "2026-11-09"
+plane: "RAGFOLD-9"
 ---
 
 # Feature: pgvector Hybrid Search

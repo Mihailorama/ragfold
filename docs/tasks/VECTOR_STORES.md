@@ -3,6 +3,7 @@ purpose: "Async VectorStore protocol for stored chunks, with an in-memory refere
 status: "OPEN"
 priority: "P0"
 created: "2026-06-20"
+plane: "RAGFOLD-19"
 ---
 
 # Feature: Vector Stores

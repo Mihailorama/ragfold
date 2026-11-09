@@ -3,6 +3,7 @@ purpose: "Reposition docs as a retrieval library plus benchmarks, with tested in
 status: "OPEN"
 priority: "P1"
 created: "2026-11-09"
+plane: "RAGFOLD-4"
 ---
 
 # Feature: Library Documentation

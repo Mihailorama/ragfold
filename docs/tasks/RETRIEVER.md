@@ -3,6 +3,7 @@ purpose: "Production Retriever: embed query, store search (vector/text/hybrid), 
 status: "OPEN"
 priority: "P0"
 created: "2026-11-09"
+plane: "RAGFOLD-18"
 ---
 
 # Feature: Retriever

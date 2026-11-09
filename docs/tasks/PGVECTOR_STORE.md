@@ -3,6 +3,7 @@ purpose: "Real pgvector VectorStore over a caller-owned async connection, RLS-fr
 status: "OPEN"
 priority: "P0"
 created: "2026-11-09"
+plane: "RAGFOLD-11"
 ---
 
 # Feature: pgvector Store

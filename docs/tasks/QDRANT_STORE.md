@@ -3,6 +3,7 @@ purpose: "Optional Qdrant VectorStore over a caller-provided AsyncQdrantClient"
 status: "OPEN"
 priority: "P3"
 created: "2026-11-09"
+plane: "RAGFOLD-14"
 ---
 
 # Feature: Qdrant Store

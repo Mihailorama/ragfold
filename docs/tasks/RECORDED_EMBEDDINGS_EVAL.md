@@ -3,6 +3,7 @@ purpose: "Key-free retrieval evals in CI from recorded embeddings"
 status: "OPEN"
 priority: "P1"
 created: "2026-11-09"
+plane: "RAGFOLD-15"
 ---
 
 # Feature: Recorded Embeddings for Evaluation

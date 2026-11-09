@@ -3,6 +3,7 @@ purpose: "Stable typed public API, semver/deprecation policy and clean permissiv
 status: "OPEN"
 priority: "P0"
 created: "2026-11-09"
+plane: "RAGFOLD-13"
 ---
 
 # Feature: Public API and Packaging

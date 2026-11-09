@@ -3,6 +3,7 @@ purpose: "Async injectable Reranker protocol and an awaited rerank stage"
 status: "OPEN"
 priority: "P1"
 created: "2026-06-20"
+plane: "RAGFOLD-16"
 ---
 
 # Feature: Rerankers
