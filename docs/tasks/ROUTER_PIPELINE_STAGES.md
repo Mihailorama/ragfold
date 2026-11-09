@@ -1,6 +1,6 @@
 ---
 purpose: "Wire chunking and compression lifecycle stages into EngineRouter"
-status: "OPEN"
+status: "DONE"
 priority: "P1"
 created: "2026-06-20"
 ---
@@ -52,3 +52,8 @@ pytest -m "not slow"
 ## Out of Scope
 - Async chunkers/compressors.
 - Indexer integration.
+
+## Audit (2026-11-09)
+Marked DONE in the starter-integration backlog audit: the scope above is
+implemented and `pytest -m "not slow"` is green (90 passed). Evidence: `EngineRouter(chunker=..., compressor=...)` and `_prepare_corpus`; `tests/engines/test_router.py` (`test_router_applies_chunker_before_retrieval`, `..._compressor_after_retrieval`, `test_compare_uses_router_pipeline_stages`) pass.
+Unchecked `slow` items above stay manual; they are not tracked as open work.

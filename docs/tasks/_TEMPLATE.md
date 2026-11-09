@@ -3,6 +3,7 @@ purpose: ""
 status: "OPEN"
 priority: "P1"
 created: "YYYY-MM-DD"
+plane: "RAGFOLD-<n>"
 ---
 
 # Feature: FEATURE_NAME

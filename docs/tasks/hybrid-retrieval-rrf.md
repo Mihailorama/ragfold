@@ -1,6 +1,6 @@
 ---
 purpose: "Add cross-engine hybrid retrieval via Reciprocal Rank Fusion (RRF)"
-status: "OPEN"
+status: "DONE"
 priority: "P1"
 created: "2026-09-20"
 ---
@@ -137,3 +137,8 @@ weighting, the initial router-only scope was extended:
   extra, imported lazily).
 - Gradient-trained/model-based fusion (the tuner is a deterministic grid
   search, not an ML model).
+
+## Audit (2026-11-09)
+Marked DONE in the starter-integration backlog audit: the scope above is
+implemented and `pytest -m "not slow"` is green (90 passed). Evidence: `src/ragfold/fusion.py`, `fusion_tuning.py`, `EngineRouter.retrieve_hybrid`, CLI `hybrid`, `mcp_server.py`; `tests/test_fusion.py`, `tests/test_fusion_tuning.py`, `tests/test_mcp_server.py`, `tests/engines/test_router.py` pass.
+Unchecked `slow` items above stay manual; they are not tracked as open work.

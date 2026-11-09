@@ -1,6 +1,6 @@
 ---
 purpose: "Bring ragfold to a docfold-grade RAG/extraction aggregator baseline"
-status: "OPEN"
+status: "DONE"
 priority: "P1"
 created: "2026-06-20"
 ---
@@ -72,3 +72,8 @@ ragfold compare examples/corpus.json examples/queries.json
 ## Out of Scope
 - Downloading real ViDoRe/UNIDOC assets during CI.
 - Real inference for GPU/model/SaaS adapters without explicit extras and keys.
+
+## Audit (2026-11-09)
+Marked DONE in the starter-integration backlog audit: the scope above is
+implemented and `pytest -m "not slow"` is green (90 passed). Evidence: public contract in `engines/base.py`, router, metrics/runner, CLI `list-engines`/`compare`/`bench`, docs and the 3-OS CI matrix all exist; `tests/test_project_docs.py`, `tests/engines/test_router.py`, `tests/evaluation/*` pass.
+Unchecked `slow` items above stay manual; they are not tracked as open work.

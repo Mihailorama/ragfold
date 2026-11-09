@@ -1,6 +1,6 @@
 ---
 purpose: "Represent framework retrievers as gated thin adapters"
-status: "OPEN"
+status: "OBSOLETE"
 priority: "P3"
 created: "2026-06-20"
 ---
@@ -41,3 +41,12 @@ pytest tests/engines/test_registry_and_stubs.py -m "not slow"
 
 ## Out of Scope
 - Deep framework indexing abstractions.
+
+## Audit (2026-11-09)
+OBSOLETE. The capability-declaring stubs in `engines/frameworks.py` exist and
+their unit tests pass, but the real adapters will not be built: the 1.0 goal is
+for ragfold to be the retrieval library itself (see `ROADMAP.md`), and LlamaIndex
+and Haystack retrievers make their own model calls, which downstream apps such as
+saas-agent-starter cannot route through their gateway. A user who already has a
+framework retriever can wrap it with the injected-client convention of
+`GITHUB_RAG_CLIENT_ADAPTERS.md`. Reopen only on a concrete user request.

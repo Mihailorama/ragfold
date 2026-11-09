@@ -1,6 +1,6 @@
 ---
 purpose: "Add a real BM25 lexical retrieval engine"
-status: "OPEN"
+status: "DONE"
 priority: "P1"
 created: "2026-06-20"
 ---
@@ -44,3 +44,8 @@ pytest tests/test_cli.py -m "not slow"
 
 ## Out of Scope
 - Language-specific analyzers or stemming.
+
+## Audit (2026-11-09)
+Marked DONE in the starter-integration backlog audit: the scope above is
+implemented and `pytest -m "not slow"` is green (90 passed). Evidence: `src/ragfold/engines/bm25.py`; `tests/engines/test_lexical_engines.py` (BM25 ranking, empty corpus) and `tests/test_cli.py` pass.
+Unchecked `slow` items above stay manual; they are not tracked as open work.

@@ -1,6 +1,6 @@
 ---
 purpose: "Keep a real TF-IDF text-rag baseline"
-status: "OPEN"
+status: "DONE"
 priority: "P1"
 created: "2026-06-20"
 ---
@@ -40,3 +40,8 @@ pytest tests/engines/test_lexical_engines.py -m "not slow"
 
 ## Out of Scope
 - Neural retrieval or query expansion.
+
+## Audit (2026-11-09)
+Marked DONE in the starter-integration backlog audit: the scope above is
+implemented and `pytest -m "not slow"` is green (90 passed). Evidence: `src/ragfold/engines/text_rag.py`; `tests/engines/test_lexical_engines.py` passes.
+Unchecked `slow` items above stay manual; they are not tracked as open work.
