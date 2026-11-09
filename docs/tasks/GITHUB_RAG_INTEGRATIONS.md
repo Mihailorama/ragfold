@@ -1,6 +1,6 @@
 ---
 purpose: "Plan and stage integrations from Mihailorama GitHub RAG-related forks"
-status: "OPEN"
+status: "DONE"
 priority: "P1"
 created: "2026-06-20"
 ---
@@ -71,3 +71,8 @@ ruff check src tests
 - Vendoring external repositories.
 - Running model downloads, SaaS APIs, Gemini, LightRAG storage, or CocoIndex
   services in default CI.
+
+## Audit (2026-11-09)
+Marked DONE in the starter-integration backlog audit: the scope above is
+implemented and `pytest -m "not slow"` is green (90 passed). Evidence: `engines/github_rag.py`, `preprocessing.py`, `compression.py`, `indexing.py`, `evaluation/promptfoo.py` and the extras exist; `tests/test_processing_stages.py`, `tests/test_optional_extras.py`, `tests/evaluation/test_promptfoo_export.py` pass.
+Unchecked `slow` items above stay manual; they are not tracked as open work.

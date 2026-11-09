@@ -1,6 +1,6 @@
 ---
 purpose: "Make GitHub RAG adapters usable with injected clients without heavy dependencies"
-status: "OPEN"
+status: "DONE"
 priority: "P1"
 created: "2026-06-20"
 ---
@@ -55,3 +55,8 @@ pytest -m "not slow"
 ## Out of Scope
 - Importing or configuring real third-party clients.
 - Network calls in default CI.
+
+## Audit (2026-11-09)
+Marked DONE in the starter-integration backlog audit: the scope above is
+implemented and `pytest -m "not slow"` is green (90 passed). Evidence: `_InjectedClientEngine._call_client` / `_normalize_result` in `engines/github_rag.py`; `tests/engines/test_github_rag_engines.py` covers async dict and sync list clients.
+Unchecked `slow` items above stay manual; they are not tracked as open work.
